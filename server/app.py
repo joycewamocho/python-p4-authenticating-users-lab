@@ -52,6 +52,27 @@ api.add_resource(ClearSession, '/clear')
 api.add_resource(IndexArticle, '/articles')
 api.add_resource(ShowArticle, '/articles/<int:id>')
 
+class Login(Resource):
+    def post(self):
+        data=request.get_json()
+        user = User.query.filter(User.username == data['username']).first()
+        session['user_id'] = user.id
+        return user.to_dict()
+api.add_resource(Login,'/login')
 
+class Logout(Resource):
+    def delete(self):
+        session['user_id']=None
+        return {"message":"No data"},204
+api.add_resource(Logout,'/logout')
+
+class CheckSession(Resource):
+    def get(self):
+       user=User.query.filter(User.id == session.get("user_id")).first()
+       if user:
+        return user.to_dict(),200
+       else:
+        return{},401
+api.add_resource(CheckSession,'/check_session')
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
